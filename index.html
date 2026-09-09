@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speck Color 🇲🇿</title>
+
+<style>
+:root {
+  --blue: #0877d1;
+  --dark: #071827;
+  --green: #13a65a;
+  --red: #e63946;
+  --light: #f3f7fb;
+  --card: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(160deg, #071827, #0877d1);
+  color: #17212b;
+}
+
+.app {
+  max-width: 480px;
+  min-height: 100vh;
+  margin: auto;
+  background: var(--light);
+}
+
+header {
+  color: white;
+  padding: 22px 18px;
+  background: linear-gradient(135deg, #0877d1, #0a4f91);
+  text-align: center;
+}
+
+.logo {
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.subtitle {
+  font-size: 13px;
+  opacity: .9;
+  margin-top: 5px;
+}
+
+.status {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 18px;
+  font-size: 12px;
+}
+
+.status span {
+  background: rgba(255,255,255,.15);
+  padding: 7px 10px;
+  border-radius: 20px;
+}
+
+main {
+  padding: 16px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 17px;
+  margin-bottom: 15px;
+  box-shadow: 0 5px 18px rgba(0,0,0,.07);
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  color: #607080;
+  margin-bottom: 7px;
+}
+
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #d7e0e8;
+  border-radius: 12px;
+  padding: 13px;
+  font-size: 15px;
+  background: white;
+}
+
+.swap {
+  display: block;
+  margin: 9px auto;
+  border: 0;
+  background: #e7f2fc;
+  color: var(--blue);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.mic-area {
+  text-align: center;
+  padding: 10px;
+}
+
+.mic {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  border: none;
+  background: var(--blue);
+  color: white;
+  font-size: 34px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(8,119,209,.35);
+}
+
+.mic.listening {
+  background: var(--red);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.mic-text {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+button.action {
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--green);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button.secondary {
+  background: #e7f2fc;
+  color: var(--blue);
+}
+
+.result {
+  min-height: 100px;
+  background: #f7fafc;
+  border-radius: 12px;
+  padding: 14px;
+  line-height: 1.5;
+}
+
+.participant {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #edf1f4;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: var(--green);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 7px;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #708090;
+  font-size: 11px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+  <div class="logo">SPECK COLOR 🇲🇿</div>
+  <div class="subtitle">
+    Comunicação sem barreiras linguísticas
+  </div>
+
+  <div class="status">
+    <span>🟢 Internet</span>
+    <span>🔵 Bluetooth</span>
+    <span>⌚ Smartwatch</span>
+  </div>
+</header>
+
+<main>
+
+<div class="card">
+
+  <label>IDIOMA DE ENTRADA</label>
+
+  <select id="fromLang">
+    <option value="auto">Detectar automaticamente</option>
+    <option value="sena">Sena</option>
+    <option value="ndau">Ndau</option>
+    <option value="pt">Português</option>
+    <option value="en">English</option>
+    <option value="fr">Français</option>
+    <option value="sw">Swahili</option>
+  </select>
+
+  <button class="swap" onclick="swapLanguages()">⇅</button>
+
+  <label>IDIOMA DO OUVINTE</label>
+
+  <select id="toLang">
+    <option value="pt">Português</option>
+    <option value="sena">Sena</option>
+    <option value="ndau">Ndau</option>
+    <option value="en">English</option>
+    <option value="fr">Français</option>
+    <option value="sw">Swahili</option>
+  </select>
+
+</div>
+
+<div class="card">
+
+  <label>VOZ DO COMUNICADOR</label>
+
+  <textarea
+    id="inputText"
+    placeholder="Fale ou escreva aqui..."
+  ></textarea>
+
+  <div class="mic-area">
+
+    <button
+      id="micButton"
+      class="mic"
+      onclick="startVoice()">
+      🎙️
+    </button>
+
+    <div class="mic-text" id="micStatus">
+      Toque para falar
+    </div>
+
+  </div>
+
+</div>
+
+<div class="card">
+
+  <label>TRADUÇÃO</label>
+
+  <div class="result" id="translation">
+    A tradução aparecerá aqui.
+  </div>
+
+  <button
+    class="action"
+    onclick="translateText()">
+    🤖 TRADUZIR
+  </button>
+
+  <button
+    class="action secondary"
+    onclick="speakTranslation()">
+    🔊 OUVIR TRADUÇÃO
+  </button>
+
+</div>
+
+<div class="card">
+
+  <label>MODO REUNIÃO</label>
+
+  <button
+    class="action"
+    onclick="addParticipant()">
+    👥 ADICIONAR PARTICIPANTE
+  </button>
+
+  <div id="participants">
+
+    <div class="participant">
+      <span>
+        <span class="dot"></span>
+        Participante 1
+      </span>
+      <span>🎧</span>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="card">
+
+  <label>DISPOSITIVOS</label>
+
+  <button
+    class="action secondary"
+    onclick="connectBluetooth()">
+    🔵 CONECTAR BLUETOOTH
+  </button>
+
+  <button
+    class="action secondary"
+    onclick="connectWatch()">
+    ⌚ CONECTAR SMARTWATCH
+  </button>
+
+</div>
+
+</main>
+
+<footer>
+  Speck Color © 2026<br>
+  Criador: Melo Nhandoro Vilancajo<br>
+  Beira – Moçambique 🇲🇿
+</footer>
+
+</div>
+
+<script>
+
+let recognition;
+let participantCount = 1;
+
+const translations = {
+
+  "hello": {
+    pt: "Olá",
+    en: "Hello",
+    fr: "Bonjour",
+    sw: "Habari"
+  },
+
+  "bom dia": {
+    pt: "Bom dia",
+    en: "Good morning",
+    fr: "Bonjour",
+    sw: "Habari za asubuhi"
+  },
+
+  "como estás": {
+    pt: "Como estás?",
+    en: "How are you?",
+    fr: "Comment allez-vous ?",
+    sw: "Hujambo?"
+  },
+
+  "obrigado": {
+    pt: "Obrigado",
+    en: "Thank you",
+    fr: "Merci",
+    sw: "Asante"
+  },
+
+  "obrigada": {
+    pt: "Obrigada",
+    en: "Thank you",
+    fr: "Merci",
+    sw: "Asante"
+  }
+
+};
+
+
+// ===============================
+// RECONHECIMENTO DE VOZ
+// ===============================
+
+function startVoice() {
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+
+    alert(
+      "O seu navegador não suporta reconhecimento de voz. " +
+      "Experimente Chrome ou Edge."
+    );
+
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+
+  recognition.lang = getSpeechLanguage();
+
+  recognition.interimResults = false;
+
+  recognition.continuous = false;
+
+  const button = document.getElementById("micButton");
+  const status = document.getElementById("micStatus");
+
+  button.classList.add("listening");
+
+  status.innerText = "🎙️ A ouvir...";
+
+  recognition.start();
+
+  recognition.onresult = function(event) {
+
+    const text =
+      event.results[0][0].transcript;
+
+    document.getElementById("inputText").value = text;
+
+    status.innerText = "Voz captada";
+
+    translateText();
+  };
+
+  recognition.onerror = function() {
+
+    status.innerText =
+      "Não foi possível reconhecer a voz.";
+
+  };
+
+  recognition.onend = function() {
+
+    button.classList.remove("listening");
+
+  };
+}
+
+
+// ===============================
+// IDIOMA DE RECONHECIMENTO
+// ===============================
+
+function getSpeechLanguage() {
+
+  const lang =
+    document.getElementById("fromLang").value;
+
+  const map = {
+
+    pt: "pt-PT",
+    en: "en-US",
+    fr: "fr-FR",
+    sw: "sw",
+    sena: "pt-PT",
+    ndau: "pt-PT",
+    auto: "pt-PT"
+
+  };
+
+  return map[lang] || "pt-PT";
+}
+
+
+// ===============================
+// TRADUÇÃO DE DEMONSTRAÇÃO
+// ===============================
+
+function translateText() {
+
+  const input =
+    document.getElementById("inputText")
+    .value
+    .trim()
+    .toLowerCase();
+
+  const target =
+    document.getElementById("toLang").value;
+
+  if (!input) {
+
+    document.getElementById("translation")
+      .innerText =
+      "Fale ou escreva uma mensagem primeiro.";
+
+    return;
+  }
+
+  let result = null;
+
+  if (translations[input]) {
+
+    result =
+      translations[input][target];
+
+  }
+
+  if (!result) {
+
+    result =
+      "[Demonstração] Tradução para " +
+      getLanguageName(target) +
+      ": " +
+      document.getElementById("inputText").value;
+
+  }
+
+  document.getElementById("translation")
+    .innerText = result;
+}
+
+
+// ===============================
+// LEITURA DA TRADUÇÃO
+// ===============================
+
+function speakTranslation() {
+
+  const text =
+    document.getElementById("translation")
+      .innerText;
+
+  if (!text ||
+      text === "A tradução aparecerá aqui.") {
+
+    alert("Faça uma tradução primeiro.");
+
+    return;
+  }
+
+  if (!("speechSynthesis" in window)) {
+
+    alert(
+      "O seu navegador não suporta reprodução de voz."
+    );
+
+    return;
+  }
+
+  const utterance =
+    new SpeechSynthesisUtterance(text);
+
+  utterance.lang =
+    getVoiceLanguage();
+
+  speechSynthesis.cancel();
+
+  speechSynthesis.speak(utterance);
+}
+
+
+// ===============================
+// IDIOMA DA VOZ
+// ===============================
+
+function getVoiceLanguage() {
+
+  const lang =
+    document.getElementById("toLang").value;
+
+  const map = {
+
+    pt: "pt-PT",
+    en: "en-US",
+    fr: "fr-FR",
+    sw: "sw"
+
+  };
+
+  return map[lang] || "pt-PT";
+}
+
+
+// ===============================
+// TROCAR IDIOMAS
+// ===============================
+
+function swapLanguages() {
+
+  const from =
+    document.getElementById("fromLang");
+
+  const to =
+    document.getElementById("toLang");
+
+  if (from.value === "auto") {
+
+    from.value = "pt";
+
+  }
+
+  const temp = from.value;
+
+  from.value = to.value;
+
+  to.value = temp;
+}
+
+
+// ===============================
+// PARTICIPANTES
+// ===============================
+
+function addParticipant() {
+
+  participantCount++;
+
+  const container =
+    document.getElementById("participants");
+
+  const participant =
+    document.createElement("div");
+
+  participant.className =
+    "participant";
+
+  participant.innerHTML = `
+    <span>
+      <span class="dot"></span>
+      Participante ${participantCount}
+    </span>
+    <span>🎧</span>
+  `;
+
+  container.appendChild(participant);
+}
+
+
+// ===============================
+// BLUETOOTH
+// ===============================
+
+async function connectBluetooth() {
+
+  if (!navigator.bluetooth) {
+
+    alert(
+      "Bluetooth Web não está disponível " +
+      "neste navegador/dispositivo."
+    );
+
+    return;
+  }
+
+  try {
+
+    const device =
+      await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true
+      });
+
+    alert(
+      "Dispositivo encontrado: " +
+      (device.name || "Dispositivo Bluetooth")
+    );
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+}
+
+
+// ===============================
+// SMARTWATCH
+// ===============================
+
+async function connectWatch() {
+
+  if (!navigator.bluetooth) {
+
+    alert(
+      "Para conectar o smartwatch, " +
+      "o navegador precisa suportar Web Bluetooth."
+    );
+
+    return;
+  }
+
+  try {
+
+    const device =
+      await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true
+      });
+
+    alert(
+      "Smartwatch/dispositivo selecionado: " +
+      (device.name || "Smartwatch")
+    );
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+}
+
+
+// ===============================
+// NOMES DOS IDIOMAS
+// ===============================
+
+function getLanguageName(lang) {
+
+  const names = {
+
+    sena: "Sena",
+    ndau: "Ndau",
+    pt: "Português",
+    en: "Inglês",
+    fr: "Francês",
+    sw: "Suaíli"
+
+  };
+
+  return names[lang] || lang;
+}
+
+</script>
+
+</body>
+</html>
