@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#eeeeee">
+  <title>My Friends</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
+    .app{max-width:520px;margin:auto;height:100vh;background:#fff;display:flex;flex-direction:column;box-shadow:0 0 12px #bbb}
+    header{background:linear-gradient(90deg,#833AB4,#C13584,#E1306C,#FD1D1D,#F77737);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #C13584}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#833AB4,#E1306C);color:#fff;display:grid;place-items:center;font-weight:bold}
+    h1{font-size:20px;margin:0}.sub{font-size:11px;color:#fff;margin-top:2px}
+    button{border:0;border-radius:20px;padding:9px 13px;cursor:pointer}
+    #clear{background:linear-gradient(135deg,#833AB4,#E1306C);color:#fff}
+    .chat{flex:1;overflow-y:auto;padding:16px;background:#f7f7f7}
+    .welcome{text-align:center;color:#777;margin:25px 10px}
+    .bubble{max-width:82%;padding:10px 13px;margin:9px 0;border-radius:16px;line-height:1.4;word-wrap:break-word}
+    .user{margin-left:auto;background:#ddd;border-bottom-right-radius:4px}
+    .bot{margin-right:auto;background:#f0e6f7;color:#222;border-bottom-left-radius:4px}
+    .time{font-size:9px;color:#777;display:block;text-align:right;margin-top:4px}
+    .suggestions{display:flex;gap:7px;overflow-x:auto;padding:8px 10px;border-top:1px solid #ddd}
+    .suggestions button{white-space:nowrap;background:#f2f2f2}
+    .composer{display:flex;gap:7px;padding:10px;border-top:2px solid #eee;background:#fff}
+    textarea{flex:1;resize:none;border:2px solid #ddd;border-radius:20px;padding:10px 14px;font:inherit;min-height:42px;max-height:100px;outline:none}
+    #send{background:linear-gradient(135deg,#833AB4,#E1306C);color:white;min-width:70px}
+    .menu{font-size:22px;background:transparent;padding:5px}
+    @media(min-width:521px){body{padding:10px 0}.app{height:calc(100vh - 20px);border-radius:12px;overflow:hidden}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo">MF</div>
+      <div><h1>My Friends</h1><div class="sub">IA Friend • Chat & Estudos</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="menu" id="aiSearch" title="Pesquisar com IA">🔍</button>
+      <button class="menu" id="clear" title="Apagar conversa">🗑️</button>
+    </div>
+  </header>
+
+  <main class="chat" id="chat">
+    <div class="welcome" id="welcome">
+      <strong>Bem-vindo ao My Friends</strong><br>
+      Converse com a IA Friend e peça ajuda nos seus estudos.
+    </div>
+  </main>
+
+  <div class="suggestions">
+    <button onclick="quick('Ajuda-me a criar um plano de estudos')">📚 Plano de estudos</button>
+    <button onclick="quick('Explique esta matéria de forma simples')">🎓 Explicar matéria</button>
+    <button onclick="quick('Sugira uma metodologia de aprendizagem')">🧠 Metodologia</button>
+  </div>
+
+  <div class="composer">
+    <textarea id="input" placeholder="Escreva uma mensagem..." rows="1"></textarea>
+    <button id="send">Enviar</button>
+  </div>
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const send = document.getElementById("send");
+const KEY = "myfriends_chat_v1";
+
+function timeNow(){
+  return new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify([...chat.querySelectorAll(".bubble")].map(x=>({
+  type:x.classList.contains("user")?"user":"bot", html:x.innerHTML
+})))); }
+function load(){
+  const data = JSON.parse(localStorage.getItem(KEY)||"[]");
+  if(data.length){
+    document.getElementById("welcome")?.remove();
+    data.forEach(m=>addBubble(m.type,m.html,false));
+  }
+}
+function addBubble(type, text, persist=true){
+  document.getElementById("welcome")?.remove();
+  const div=document.createElement("div");
+  div.className="bubble "+type;
+  div.innerHTML=text;
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
+  if(persist) save();
+}
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+
+function respond(message){
+  const m=message.toLowerCase();
+  let answer="Recebi a sua mensagem. Na próxima fase, o My Friends será ligado a uma IA e a uma pesquisa online para dar respostas mais completas.";
+  if(m.includes("plano de estudos"))
+    answer="📚 Plano inicial: escolha uma matéria, estude 25 minutos, faça 5 minutos de pausa, depois pratique com perguntas e revise o conteúdo no fim do dia.";
+  else if(m.includes("metodologia"))
+    answer="🧠 Sugestão: use aprendizagem ativa — leia pouco, explique com as suas próprias palavras, faça perguntas, pratique exercícios e revise em intervalos.";
+  else if(m.includes("estudo")||m.includes("matéria"))
+    answer="🎓 Posso ajudar a organizar a matéria em tópicos, resumo, perguntas, exercícios e revisão. Escreva o nome da matéria e o assunto.";
+  else if(m.includes("olá")||m.includes("ola")||m.includes("oi"))
+    answer="Olá! 👋 Sou a IA Friend do My Friends. Como posso ajudar hoje?";
+  setTimeout(()=>addBubble("bot",escapeHTML(answer)+"<span class='time'>"+timeNow()+"</span>"),350);
+}
+
+function sendMessage(){
+  const text=input.value.trim();
+  if(!text)return;
+  addBubble("user",escapeHTML(text)+"<span class='time'>"+timeNow()+"</span>");
+  input.value="";
+  respond(text);
+}
+function quick(t){input.value=t;sendMessage();}
+send.onclick=sendMessage;
+input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}});
+document.getElementById("aiSearch").onclick=()=>{
+  const query = prompt("🔍 Pesquisar com IA\n\nDigite o que deseja pesquisar:");
+  if(query && query.trim()){
+    input.value = "Pesquisar com IA: " + query.trim();
+    sendMessage();
+  }
+};
+
+document.getElementById("clear").onclick=()=>{
+  if(confirm("Apagar todas as mensagens desta conversa?")){
+    localStorage.removeItem(KEY);
+    chat.innerHTML='<div class="welcome" id="welcome"><strong>Conversa apagada.</strong><br>Comece uma nova conversa no My Friends.</div>';
+  }
+};
+load();
+</script>
+</body>
+</html>
